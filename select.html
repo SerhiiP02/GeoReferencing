@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet Map with Scrollable Photo</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        #container { display: flex; height: 400px; }
+        #map { flex: 1; }
+        #image {
+            flex: 1;
+            overflow: auto;
+        }
+        #photo {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<div id="container">
+    <div id="map"></div>
+    <div id="image">
+        <img id="photo" src="#" alt="Photo">
+    </div>
+</div>
+<label for="fileInput">Select an image:</label>
+<input type="file" id="fileInput" accept="image/*">
+<script>
+    var map = L.map('map').setView([48.54, 35.1], 15);  // Set initial location and zoom level
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);  // Add OpenStreetMap tiles
+
+    var coordinates = []; // Array to store selected coordinates
+
+    // Add click event listener to the map
+    function onMapClick(e) {
+        console.log("Clicked on map at: " + e.latlng);
+        coordinates.push(e.latlng); // Save coordinates to array
+    }
+    map.on('click', onMapClick);
+
+    // Add change event listener to the file input
+    var fileInput = document.getElementById('fileInput');
+    fileInput.addEventListener('change', function(e) {
+        var file = fileInput.files[0];
+        var reader = new FileReader();
+        reader.onload = function(event) {
+            document.getElementById('photo').src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Add click event listener to the photo
+    var photo = document.getElementById('photo');
+    photo.addEventListener('click', function(e) {
+        var rect = photo.getBoundingClientRect();
+        var x = Math.round(e.clientX - rect.left - window.pageXOffset);
+        var y = Math.round(e.clientY - rect.top - window.pageYOffset);
+
+        console.log("Clicked on photo at: (" + x + ", " + y + ")");
+        // Here you can convert pixel coordinates to geographic coordinates if needed
+        coordinates.push({x: x, y: y}); // Save coordinates to array
+    });
+
+    // Function to save coordinates
+    function saveCoordinates() {
+        console.log("Selected coordinates:", coordinates);
+        // Here you can send coordinates to server using AJAX request
+    }
+</script>
+</body>
+</html>
